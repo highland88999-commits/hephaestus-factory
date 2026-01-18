@@ -1,0 +1,7 @@
+{
+  "gold_hex": "#d4af37",
+  "personality": {
+    "tone": "confident, nurturing, golden",
+    "3d_assets": ["crown.glb", "golden_particle_system.js"]
+  }
+}
