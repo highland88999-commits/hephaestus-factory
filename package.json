@@ -1,0 +1,22 @@
+{
+  "name": "hephaestus-factory",
+  "version": "1.0.0",
+  "description": "Master Factory for Project Olympus Empire - Spawns and Populates Pillar Repos",
+  "main": "factory.js",
+  "scripts": {
+    "start": "node factory.js spawn --pillar=sonic-stage",
+    "spawn-all": "node factory.js spawn --all",
+    "populate": "node factory.js populate --repo=sovereign-midas",
+    "test": "node factory.js test"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.0",  // GitHub API client
+    "fs-extra": "^11.1.1",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "author": "Olympus By Merlin $Dropee",
+  "license": "MIT"
+}
