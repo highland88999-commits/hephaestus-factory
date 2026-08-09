@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOVEREIGN MIDAS | HEPHAESTUS FACTORY CORE</title>
+    
+    <!-- Midas Protocol Gold Styling & Aesthetics -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --gold-hex: #d4af37;
+            --neon-cyan: #00ffff;
+            --neon-purple: #bc13fe;
+            --black-bloom: #050505;
+            --glow: 0 0 25px rgba(212, 175, 55, 0.4);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--black-bloom);
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+            color: #fff;
+            user-select: none;
+        }
+
+        #threeCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            display: block;
+        }
+
+        .midas-gold {
+            color: var(--gold-hex);
+            text-shadow: 0 0 10px var(--gold-hex);
+        }
+
+        #ui-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 15px 25px;
+            border-radius: 8px;
+            pointer-events: auto;
+            box-shadow: var(--glow);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            border: 1px solid var(--gold-hex);
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .command-console {
+            background: rgba(10, 10, 15, 0.9);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--gold-hex);
+            color: var(--gold-hex);
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .action-btn:hover {
+            background: var(--gold-hex);
+            color: #000;
+            box-shadow: 0 0 15px var(--gold-hex);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="threeCanvas"></canvas>
+
+    <div id="ui-overlay">
+        <header>
+            <h1><span class="midas-gold">SOVEREIGN MIDAS</span> // FACTORY CHAMBER</h1>
+            <div class="status-badge midas-gold">DNA: GOLD_HEX [#d4af37] ACTIVE</div>
+        </header>
+
+        <footer>
+            <div class="command-console">
+                <span>SYSTEM: <span style="color: #00ffff;">ONLINE</span></span>
+                <span>|</span>
+                <button class="action-btn" onclick="toggleRotation()">[ TOGGLE KINETIC SPIN ]</button>
+                <button class="action-btn" onclick="triggerMidasPulse()">[ MIDAS PULSE ]</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        /* ============================================================
+           NEVERSLEEP API INTEGRATION (neversleep.js)
+           ============================================================ */
+        let wakeLock = null;
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('⚡ Screen Wake Lock active - Renderer stays energized.');
+                } catch (err) {
+                    console.error(`${err.name}, ${err.message}`);
+                }
+            }
+        }
+        requestWakeLock();
+
+        // ============================================================
+        // THREE.JS SCENE SETUP — MIDAS GOLDEN CHAMBER
+        // ============================================================
+        const canvas = document.getElementById('threeCanvas');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050505, 0.0015);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
+        camera.position.z = 400;
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x222222);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0xd4af37, 5, 1000);
+        pointLight.position.set(0, 0, 200);
+        scene.add(pointLight);
+
+        const cyanLight = new THREE.PointLight(0x00ffff, 3, 1000);
+        cyanLight.position.set(-300, 200, -200);
+        scene.add(cyanLight);
+
+        // Core Geometry (Golden Torus Knot representing Sovereign Midas Protocol)
+        const geometry = new THREE.TorusKnotGeometry(120, 35, 128, 32);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0xd4af37,
+            metalness: 0.9,
+            roughness: 0.1,
+            wireframe: false
+        });
+        const midasCore = new THREE.Mesh(geometry, material);
+        scene.add(midasCore);
+
+        // Particle Matrix Field
+        const particleCount = 2000;
+        const particleGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+
+        for(let i = 0; i < particleCount * 3; i++) {
+            particlePositions[i] = (Math.random() - 0.5) * 1500;
+        }
+
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particleMaterial = new THREE.PointsMaterial({
+            color: 0xd4af37,
+            size: 2.5,
+            transparent: true,
+            opacity: 0.7
+        });
+        const particleField = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particleField);
+
+        // Interaction States
+        let isRotating = true;
+        let pulseFactor = 0;
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+        }
+
+        function triggerMidasPulse() {
+            pulseFactor = 1.5;
+            material.emissive.setHex(0xd4af37);
+            setTimeout(() => {
+                material.emissive.setHex(0x000000);
+            }, 600);
+        }
+
+        // Animation Loop
+        let clock = new THREE.Clock();
+        function animate() {
+            const elapsedTime = clock.getElapsedTime();
+
+            if (isRotating) {
+                midasCore.rotation.x = elapsedTime * 0.4;
+                midasCore.rotation.y = elapsedTime * 0.6;
+            }
+
+            particleField.rotation.y = elapsedTime * 0.05;
+
+            // Handle pulse decay
+            if (pulseFactor > 0) {
+                pulseFactor -= 0.03;
+                midasCore.scale.set(1 + pulseFactor * 0.2, 1 + pulseFactor * 0.2, 1 + pulseFactor * 0.2);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        renderer.setAnimationLoop(animate);
+
+        // Tab Inactivity Frame Skipping (neversleep.js standard)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                renderer.setAnimationLoop(null);
+            } else {
+                renderer.setAnimationLoop(animate);
+                requestWakeLock();
+            }
+        });
+
+        // Window Resizing
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
