@@ -1,0 +1,9 @@
+requirements.txt
+scraper_connector.py
+personality.py
+pillar_manifest.json
+temp-clone/
+.env
+.env.example
+__pycache__/
+*.pyc
